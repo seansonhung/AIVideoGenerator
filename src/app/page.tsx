@@ -6,6 +6,7 @@ export default function Home() {
   return (
     <div>
       <Provider>
+        <h1>test font</h1>
         <Button> Click </Button>
         <UserButton />
         
