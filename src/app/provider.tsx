@@ -1,6 +1,7 @@
 "use client"
 import { useUser } from '@clerk/nextjs';
 import React, { ReactNode, useEffect } from 'react';
+import axios from 'axios';
 
 type Props = {
   children: ReactNode;  // Define the children prop
@@ -18,23 +19,20 @@ const Provider = ({ children }: Props) => {
   //check if user is new and insert into the database
   const isNewUser = async() =>{
     try {
-      const response = await fetch('/api/users/isNewUser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user }), // Send the user data in the body
+      const response = await axios.post('/api/users/is-new-user', {
+        user, // Send the user data in the body
       });
+  
 
-      const result = await response.json();
-
-      if (response.ok) {
-        console.log(result.message); // Either 'User created successfully' or 'User already exists'
-      } else {
-        console.error('Error:', result.error);
-      }
+      console.log(response.data.message); // Either 'User created successfully' or 'User already exists'
     } catch (error) {
-      console.log('Error calling isNewUser API:', error);
+      if (axios.isAxiosError(error)) {
+        // Axios error handling
+        console.error('API Error:', error.response?.data?.error || error.message);
+      } else {
+        // Generic error handling
+        console.error('Unexpected Error:', error);
+      }
     }
   };
   

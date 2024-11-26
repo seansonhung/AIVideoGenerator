@@ -1,13 +1,14 @@
+import { NextResponse } from 'next/server';
 import { db } from '../../../../db';
 import { Users } from '../../../../db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
-  const { user } = await req.json();  // Read the JSON body from the client
+  const { user } = await req.json(); // Read the JSON body from the client
 
   if (!user || !user.primaryEmailAddress?.emailAddress) {
-    return new Response(
-      JSON.stringify({ error: 'User or email is missing' }),
+    return NextResponse.json(
+      { error: 'User or email is missing' },
       { status: 400 }
     );
   }
@@ -26,19 +27,19 @@ export async function POST(req: Request) {
         imageUrl: user.imageUrl ?? '',
       });
 
-      return new Response(
-        JSON.stringify({ message: 'User created successfully' }),
+      return NextResponse.json(
+        { message: 'User created successfully' },
         { status: 201 }
       );
     } else {
-      return new Response(
-        JSON.stringify({ message: 'User already exists' }),
+      return NextResponse.json(
+        { message: 'User already exists' },
         { status: 200 }
       );
     }
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Error checking/creating user' }),
+    return NextResponse.json(
+      { error: 'Error checking/creating user' },
       { status: 500 }
     );
   }
