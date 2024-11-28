@@ -6,6 +6,7 @@ import SelectDuration from './_components/SelectDuration';
 import { Button } from '@/components/ui/button';
 import axios from 'axios';
 import Loader from './_components/Loader';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CreateNew() {
 
@@ -24,12 +25,28 @@ export default function CreateNew() {
   // Get video script from gemini model
   const getVideoScript = async () => {
     const prompt = 'Write a script to generate ' + formData.duration + ' video on topic: '+ formData.topic +' along with AI image prompt in ' + formData.style +' format for each scene and give me result in JSON format with imagePrompt and ContentText as fields';
-    const response = await axios.post('/api/gemini/get-video-script', {
+    await axios.post('/api/ai/get-video-script', {
       prompt, // Send the user data in the body
     }).then((response) => {
-      setVideoStript(response.data.result);
-      console.log(response.data.result);
+      //get the audio file from the script
+      let script = '';
+      response.data.result.forEach((scene: any) => {
+        script += scene.contentText + ' ';
+      });
+      getAudioFile(script);
     })
+  }
+
+  // Get audio from text script using google text to speech
+  const getAudioFile = async (videoScript : string) => {
+    const id = uuidv4();
+    await axios.post('/api/ai/get-audio', {
+      text : videoScript,
+      id : id,
+    }).then((response) => {
+      console.log(response.data);
+    });
+    
   }
 
   const onCreateClickHandler = async () => {
