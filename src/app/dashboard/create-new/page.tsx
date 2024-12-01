@@ -20,6 +20,8 @@ export default function CreateNew() {
 
   const [loading, setLoading] = useState(false);
 
+  const [audioFileUrl, setAudioFileUrl] = useState('');
+
   const [videoScript, setVideoStript] = useState([]);
 
   // Get video script from gemini model
@@ -44,7 +46,7 @@ export default function CreateNew() {
       text : videoScript,
       id : id,
     }).then((response) => {
-      console.log(response.data);
+      setAudioFileUrl(response.data.audioUrl);
     });
     
   }

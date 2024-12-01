@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const util = require('util');
+import { storage } from '../../../../storage';
 
 const client = new textToSpeech.TextToSpeechClient({
   apiKey: process.env.GOOGLE_API_KEY
@@ -23,12 +24,19 @@ export async function POST(req: Request) {
 
      // Performs the text-to-speech request
     const [response] = await client.synthesizeSpeech(request);
-    // Write the binary audio content to a local file
-    const writeFile = util.promisify(fs.writeFile);
-    await writeFile('output.mp3', response.audioContent, 'binary');
-    console.log('Audio content written to file: output.mp3');
+    // Write the binary audio content to a file in storage
 
-    return NextResponse.json({'result': 'SUCCESS'});
+    const audioBuffer = Buffer.from(response?.audioContent, 'binary');
+
+    const { data, error } = await storage
+    .from('ai-short-videos')
+    .upload(id + '.mp3', audioBuffer, {
+      contentType: 'audio/mpeg',
+    });
+
+    //get the public download url
+    const downloadUrl = await storage.from('ai-short-videos').getPublicUrl('ouput.mp3');
+    return NextResponse.json({'result': downloadUrl});
 
   } catch (error) {
     if (error instanceof Error) {
